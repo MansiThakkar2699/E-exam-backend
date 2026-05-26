@@ -17,6 +17,9 @@ app.use("/auth", authRoutes);
 const subjectRoutes = require("./src/routes/SubjectRoutes")
 app.use("/sub", subjectRoutes)
 
+const examRoutes = require("./src/routes/ExamRoutes")
+app.use("/exam", examRoutes)
+
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
