@@ -20,6 +20,9 @@ app.use("/sub", subjectRoutes)
 const examRoutes = require("./src/routes/ExamRoutes")
 app.use("/exam", examRoutes)
 
+const questionRoutes = require("./src/routes/QuestionRoutes")
+app.use("/que", questionRoutes)
+
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
