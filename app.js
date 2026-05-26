@@ -23,6 +23,9 @@ app.use("/exam", examRoutes)
 const questionRoutes = require("./src/routes/QuestionRoutes")
 app.use("/que", questionRoutes)
 
+const userRoutes = require("./src/routes/UserRoutes")
+app.use("/user", userRoutes)
+
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {

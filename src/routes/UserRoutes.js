@@ -1,0 +1,53 @@
+const express = require("express");
+
+const router = express.Router();
+
+const {
+  getAllUsers,
+  updateUserRole,
+  updateUserStatus,
+  deleteUser,
+} = require("../controllers/userController");
+
+const {
+  validateToken,
+  authorizeRoles,
+} = require("../middleware/authMiddleware");
+
+
+// GET USERS
+router.get(
+  "/users",
+  validateToken,
+  authorizeRoles("admin"),
+  getAllUsers
+);
+
+
+// UPDATE ROLE
+router.put(
+  "/users/role/:id",
+  validateToken,
+  authorizeRoles("admin"),
+  updateUserRole
+);
+
+
+// UPDATE STATUS
+router.put(
+  "/users/status/:id",
+  validateToken,
+  authorizeRoles("admin"),
+  updateUserStatus
+);
+
+
+// DELETE
+router.delete(
+  "/users/:id",
+  validateToken,
+  authorizeRoles("admin"),
+  deleteUser
+);
+
+module.exports = router;

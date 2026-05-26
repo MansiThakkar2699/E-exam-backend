@@ -1,6 +1,5 @@
 const Exam = require("../models/examModel");
 
-
 // CREATE EXAM
 const createExam = async (req, res) => {
   try {
@@ -37,13 +36,17 @@ const createExam = async (req, res) => {
   }
 };
 
-
 // GET ALL EXAMS
 const getAllExams = async (req, res) => {
   try {
-    const exams = await Exam.find({
+    let filter = {
       status: { $ne: "deleted" },
-    })
+    };
+
+    if (req.user.role === "faculty") {
+      filter.createdBy = req.user._id;
+    }
+    const exams = await Exam.find(filter)
       .populate("subject")
       .sort({ createdAt: -1 });
 
@@ -58,7 +61,6 @@ const getAllExams = async (req, res) => {
     });
   }
 };
-
 
 // GET SINGLE EXAM
 const getExamById = async (req, res) => {
@@ -83,15 +85,12 @@ const getExamById = async (req, res) => {
   }
 };
 
-
 // UPDATE EXAM
 const updateExam = async (req, res) => {
   try {
-    const exam = await Exam.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const exam = await Exam.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
 
     if (!exam) {
       return res.status(404).json({
@@ -111,14 +110,13 @@ const updateExam = async (req, res) => {
   }
 };
 
-
 // DELETE EXAM
 const deleteExam = async (req, res) => {
   try {
     const exam = await Exam.findByIdAndUpdate(
       req.params.id,
       { status: "deleted" },
-      { new: true }
+      { new: true },
     );
 
     if (!exam) {

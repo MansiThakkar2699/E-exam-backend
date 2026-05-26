@@ -42,8 +42,13 @@ const questionSchema = new mongoose.Schema(
       enum: ["active", "inactive", "deleted"],
       default: "active",
     },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("questions", questionSchema);

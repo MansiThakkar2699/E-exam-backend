@@ -1,17 +1,10 @@
 const Question = require("../models/questionModel");
 
-
 // CREATE QUESTION
 const createQuestion = async (req, res) => {
   try {
-    const {
-      exam,
-      question,
-      options,
-      correctAnswer,
-      marks,
-      questionType,
-    } = req.body;
+    const { exam, question, options, correctAnswer, marks, questionType } =
+      req.body;
 
     const newQuestion = await Question.create({
       exam,
@@ -20,6 +13,7 @@ const createQuestion = async (req, res) => {
       correctAnswer,
       marks,
       questionType,
+      createdBy: req.user._id,
     });
 
     res.status(201).json({
@@ -34,13 +28,17 @@ const createQuestion = async (req, res) => {
   }
 };
 
-
 // GET ALL QUESTIONS
 const getAllQuestions = async (req, res) => {
   try {
-    const questions = await Question.find({
+    let filter = {
       status: { $ne: "deleted" },
-    })
+    };
+
+    if (req.user.role === "faculty") {
+      filter.createdBy = req.user._id;
+    }
+    const questions = await Question.find(filter)
       .populate("exam")
       .sort({ createdAt: -1 });
 
@@ -55,7 +53,6 @@ const getAllQuestions = async (req, res) => {
     });
   }
 };
-
 
 // GET QUESTIONS BY EXAM
 const getQuestionsByExam = async (req, res) => {
@@ -77,15 +74,12 @@ const getQuestionsByExam = async (req, res) => {
   }
 };
 
-
 // UPDATE QUESTION
 const updateQuestion = async (req, res) => {
   try {
-    const question = await Question.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const question = await Question.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
 
     if (!question) {
       return res.status(404).json({
@@ -105,14 +99,13 @@ const updateQuestion = async (req, res) => {
   }
 };
 
-
 // DELETE QUESTION
 const deleteQuestion = async (req, res) => {
   try {
     const question = await Question.findByIdAndUpdate(
       req.params.id,
       { status: "deleted" },
-      { new: true }
+      { new: true },
     );
 
     if (!question) {
