@@ -29,6 +29,9 @@ app.use("/user", userRoutes)
 const dashboardRoutes = require("./src/routes/DashboardRoutes")
 app.use("/dashboard",dashboardRoutes)
 
+const resultRoutes = require("./src/routes/ResultRoutes")
+app.use("/result", resultRoutes)
+
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
