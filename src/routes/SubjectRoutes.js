@@ -7,11 +7,11 @@ const {
   getSubjectById,
   updateSubject,
   deleteSubject,
-} = require("../controllers/subjectController");
+} = require("../controllers/SubjectController");
 
 const {
   validateToken, authorizeRoles
-} = require("../middleware/authMiddleware");
+} = require("../middleware/AuthMiddleware");
 
 // Only admin can create/update/delete subjects
 router.post("/subjects", validateToken, authorizeRoles("admin"), createSubject);

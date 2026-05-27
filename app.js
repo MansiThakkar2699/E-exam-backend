@@ -26,6 +26,9 @@ app.use("/que", questionRoutes)
 const userRoutes = require("./src/routes/UserRoutes")
 app.use("/user", userRoutes)
 
+const dashboardRoutes = require("./src/routes/DashboardRoutes")
+app.use("/dashboard",dashboardRoutes)
+
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {

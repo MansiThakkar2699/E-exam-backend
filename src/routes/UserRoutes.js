@@ -7,12 +7,12 @@ const {
   updateUserRole,
   updateUserStatus,
   deleteUser,
-} = require("../controllers/userController");
+} = require("../controllers/UserController");
 
 const {
   validateToken,
   authorizeRoles,
-} = require("../middleware/authMiddleware");
+} = require("../middleware/AuthMiddleware");
 
 
 // GET USERS

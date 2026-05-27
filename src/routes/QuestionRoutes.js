@@ -8,12 +8,12 @@ const {
   getQuestionsByExam,
   updateQuestion,
   deleteQuestion,
-} = require("../controllers/questionController");
+} = require("../controllers/QuestionController");
 
 const {
   validateToken,
   authorizeRoles,
-} = require("../middleware/authMiddleware");
+} = require("../middleware/AuthMiddleware");
 
 
 // CREATE

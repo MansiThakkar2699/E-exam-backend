@@ -8,12 +8,12 @@ const {
   getExamById,
   updateExam,
   deleteExam,
-} = require("../controllers/examController");
+} = require("../controllers/ExamController");
 
 const {
   validateToken,
   authorizeRoles,
-} = require("../middleware/authMiddleware");
+} = require("../middleware/AuthMiddleware");
 
 
 // CREATE
