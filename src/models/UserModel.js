@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["active", "pending", "blocked", "deleted"],
-      default: "active",
+      default: "pending",
     },
   },
   { timestamps: true }

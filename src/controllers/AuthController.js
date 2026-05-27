@@ -59,7 +59,7 @@ const registerUser = async (req, res) => {
       facultyId,
       department,
       mobile,
-      status: "active",
+      status: role === "admin" ? "active" : "pending",
     });
 
     return res.status(201).json({
@@ -115,6 +115,13 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // APPROVAL CHECK
+    if (user.status !== "active") {
+      return res.status(403).json({
+        message: "Your account is waiting for admin approval",
+      });
+    }
+
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
@@ -129,7 +136,7 @@ const loginUser = async (req, res) => {
         role: user.role,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     return res.status(200).json({
@@ -170,8 +177,40 @@ const getProfile = async (req, res) => {
   }
 };
 
+const approveUser = async (req, res) => {
+  try {
+    const user =
+      await User.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: "active",
+        },
+        { new: true }
+      ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      message:
+        "User approved successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message:
+        "Failed to approve user",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
-  getProfile
+  getProfile,
+  approveUser
 };
