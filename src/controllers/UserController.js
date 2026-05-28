@@ -1,12 +1,9 @@
 const User = require("../models/UserModel");
 
-
 // GET ALL USERS
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find()
-      .select("-password")
-      .sort({ createdAt: -1 });
+    const users = await User.find({ isDeleted: false }).select("-password").sort({ createdAt: -1 });
 
     res.status(200).json({
       message: "Users fetched successfully",
@@ -20,7 +17,6 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-
 // UPDATE USER ROLE
 const updateUserRole = async (req, res) => {
   try {
@@ -29,7 +25,7 @@ const updateUserRole = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { role },
-      { new: true }
+      { new: true },
     ).select("-password");
 
     if (!user) {
@@ -50,16 +46,15 @@ const updateUserRole = async (req, res) => {
   }
 };
 
-
 // UPDATE STATUS
 const updateUserStatus = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { accountStatus } = req.body;
 
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { status },
-      { new: true }
+      { accountStatus },
+      { new: true },
     ).select("-password");
 
     if (!user) {
@@ -80,12 +75,15 @@ const updateUserStatus = async (req, res) => {
   }
 };
 
-
 // DELETE USER
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(
-      req.params.id
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        isDeleted: true,
+      },
+      { new: true },
     );
 
     if (!user) {

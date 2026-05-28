@@ -35,7 +35,7 @@ router.put(
 
 // UPDATE STATUS
 router.put(
-  "/users/status/:id",
+  "/users/accountStatus/:id",
   validateToken,
   authorizeRoles("admin"),
   updateUserStatus

@@ -59,7 +59,9 @@ const registerUser = async (req, res) => {
       facultyId,
       department,
       mobile,
-      status: role === "admin" ? "active" : "pending",
+      approvalStatus: role === "admin" ? "approved" : "pending",
+      accountStatus: "active",
+      isDeleted: false
     });
 
     return res.status(201).json({
@@ -103,22 +105,24 @@ const loginUser = async (req, res) => {
       });
     }
 
-    if (user.status === "blocked") {
+    // CHECK DELETED
+    if (user.isDeleted) {
       return res.status(403).json({
-        message: "Your account is blocked. Please contact admin.",
+        message: "Your account has been deleted",
       });
     }
 
-    if (user.status === "deleted") {
-      return res.status(403).json({
-        message: "Your account is deleted.",
-      });
-    }
-
-    // APPROVAL CHECK
-    if (user.status !== "active") {
+    // CHECK APPROVAL
+    if (user.approvalStatus === "pending") {
       return res.status(403).json({
         message: "Your account is waiting for admin approval",
+      });
+    }
+
+    // CHECK BLOCKED
+    if (user.accountStatus === "blocked") {
+      return res.status(403).json({
+        message: "Your account has been blocked by admin",
       });
     }
 
@@ -151,7 +155,8 @@ const loginUser = async (req, res) => {
         facultyId: user.facultyId,
         department: user.department,
         mobile: user.mobile,
-        status: user.status,
+        approvalStatus: user.approvalStatus,
+        accountStatus: user.accountStatus,
       },
     });
   } catch (error) {
@@ -179,14 +184,13 @@ const getProfile = async (req, res) => {
 
 const approveUser = async (req, res) => {
   try {
-    const user =
-      await User.findByIdAndUpdate(
-        req.params.id,
-        {
-          status: "active",
-        },
-        { new: true }
-      ).select("-password");
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        approvalStatus: "approved",
+      },
+      { new: true },
+    ).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -195,14 +199,34 @@ const approveUser = async (req, res) => {
     }
 
     res.status(200).json({
-      message:
-        "User approved successfully",
+      message: "User approved successfully",
       user,
     });
   } catch (error) {
     res.status(500).json({
-      message:
-        "Failed to approve user",
+      message: "Failed to approve user",
+      error: error.message,
+    });
+  }
+};
+
+const updateAccountStatus = async (req, res) => {
+  try {
+    const { accountStatus } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { accountStatus },
+      { new: true },
+    ).select("-password");
+
+    res.status(200).json({
+      message: "Account status updated successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update account status",
       error: error.message,
     });
   }
@@ -212,5 +236,6 @@ module.exports = {
   registerUser,
   loginUser,
   getProfile,
-  approveUser
+  approveUser,
+  updateAccountStatus,
 };

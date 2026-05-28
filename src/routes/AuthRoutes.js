@@ -9,7 +9,8 @@ const {
   registerUser,
   loginUser,
   getProfile,
-  approveUser
+  approveUser,
+  updateAccountStatus
 } = require("../controllers/AuthController");
 
 router.post("/register", registerUser);
@@ -19,5 +20,7 @@ router.post("/login", loginUser);
 router.get("/profile", validateToken, getProfile);
 
 router.put("/approve/:id", validateToken, authorizeRoles("admin"), approveUser);
+
+router.put("/block/:id", validateToken, authorizeRoles("admin"), updateAccountStatus);
 
 module.exports = router;

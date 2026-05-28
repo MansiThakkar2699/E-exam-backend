@@ -46,13 +46,24 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    status: {
+    approvalStatus: {
       type: String,
-      enum: ["active", "pending", "blocked", "deleted"],
+      enum: ["pending", "approved"],
       default: "pending",
     },
+
+    accountStatus: {
+      type: String,
+      enum: ["active", "blocked"],
+      default: "active",
+    },
+
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("users", userSchema);
