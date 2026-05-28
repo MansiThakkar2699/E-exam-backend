@@ -40,13 +40,26 @@ const createSubject = async (req, res) => {
 // GET ALL SUBJECTS
 const getAllSubjects = async (req, res) => {
   try {
-    const subjects = await Subject.find({ status: { $ne: "deleted" } }).sort({
-      createdAt: -1,
+    const page = Number(req.query.page) || 1;
+
+    const limit = Number(req.query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+
+    const totalSubjects = await Subject.countDocuments({
+      status: { $ne: "deleted" }
     });
+    const subjects = await Subject.find({ status: { $ne: "deleted" } })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
     res.status(200).json({
       message: "Subjects fetched successfully",
       subjects,
+      currentPage: page,
+      totalPages: Math.ceil(totalSubjects / limit),
+      totalSubjects
     });
   } catch (error) {
     res.status(500).json({
@@ -92,7 +105,7 @@ const updateSubject = async (req, res) => {
         department,
         status,
       },
-      { new: true }
+      { new: true },
     );
 
     if (!subject) {
@@ -119,7 +132,7 @@ const deleteSubject = async (req, res) => {
     const subject = await Subject.findByIdAndUpdate(
       req.params.id,
       { status: "deleted" },
-      { new: true }
+      { new: true },
     );
 
     if (!subject) {

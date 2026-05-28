@@ -46,13 +46,27 @@ const getAllExams = async (req, res) => {
     if (req.user.role === "faculty") {
       filter.createdBy = req.user._id;
     }
+
+    const page = Number(req.query.page) || 1;
+
+    const limit = Number(req.query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+
+    const totalExams = await Exam.countDocuments(filter);
+
     const exams = await Exam.find(filter)
       .populate("subject")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       message: "Exams fetched successfully",
       exams,
+      currentPage: page,
+      totalPages: Math.ceil(totalExams / limit),
+      totalExams,
     });
   } catch (error) {
     res.status(500).json({
