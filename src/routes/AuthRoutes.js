@@ -10,7 +10,8 @@ const {
   loginUser,
   getProfile,
   approveUser,
-  updateAccountStatus
+  updateAccountStatus,
+  changePassword
 } = require("../controllers/AuthController");
 
 router.post("/register", registerUser);
@@ -22,5 +23,7 @@ router.get("/profile", validateToken, getProfile);
 router.put("/approve/:id", validateToken, authorizeRoles("admin"), approveUser);
 
 router.put("/block/:id", validateToken, authorizeRoles("admin"), updateAccountStatus);
+
+router.put("/change-password", validateToken, changePassword);
 
 module.exports = router;
