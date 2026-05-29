@@ -7,6 +7,7 @@ const {
   updateUserRole,
   updateUserStatus,
   deleteUser,
+  getFaculties
 } = require("../controllers/UserController");
 
 const {
@@ -48,6 +49,12 @@ router.delete(
   validateToken,
   authorizeRoles("admin"),
   deleteUser
+);
+
+router.get(
+  "/faculties",
+  validateToken,
+  getFaculties,
 );
 
 module.exports = router;

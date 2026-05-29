@@ -17,9 +17,19 @@ const subjectSchema = new mongoose.Schema(
     },
 
     department: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "departments",
       required: true,
-      trim: true,
+    },
+
+    faculty: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
+    },
+
+    description: {
+      type: String,
     },
 
     status: {
@@ -28,7 +38,7 @@ const subjectSchema = new mongoose.Schema(
       default: "active",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("subjects", subjectSchema);

@@ -121,9 +121,29 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getFaculties = async (req, res) => {
+  try {
+    const faculties = await User.find({
+      role: "faculty",
+      isDeleted: false,
+      accountStatus: "active",
+      approvalStatus: "approved",
+    }).select("fullName email");
+
+    res.status(200).json({
+      faculties,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch faculties",
+    });
+  }
+};
+
 module.exports = {
   getAllUsers,
   updateUserRole,
   updateUserStatus,
   deleteUser,
+  getFaculties
 };

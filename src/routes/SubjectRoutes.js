@@ -3,8 +3,7 @@ const router = express.Router();
 
 const {
   createSubject,
-  getAllSubjects,
-  getSubjectById,
+  getSubjects,
   updateSubject,
   deleteSubject,
 } = require("../controllers/SubjectController");
@@ -16,9 +15,7 @@ const {
 // Only admin can create/update/delete subjects
 router.post("/subjects", validateToken, authorizeRoles("admin"), createSubject);
 
-router.get("/subjects", validateToken, getAllSubjects);
-
-router.get("/subjects/:id", validateToken, getSubjectById);
+router.get("/subjects", validateToken, getSubjects);
 
 router.put("/subjects/:id", validateToken, authorizeRoles("admin"), updateSubject);
 
