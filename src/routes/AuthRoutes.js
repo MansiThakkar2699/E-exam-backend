@@ -11,7 +11,9 @@ const {
   getProfile,
   approveUser,
   updateAccountStatus,
-  changePassword
+  changePassword,
+  resetPassword,
+  forgotPassword
 } = require("../controllers/AuthController");
 
 router.post("/register", registerUser);
@@ -25,5 +27,9 @@ router.put("/approve/:id", validateToken, authorizeRoles("admin"), approveUser);
 router.put("/block/:id", validateToken, authorizeRoles("admin"), updateAccountStatus);
 
 router.put("/change-password", validateToken, changePassword);
+
+router.post("/forgot-password", forgotPassword);
+
+router.post("/reset-password/:token", resetPassword);
 
 module.exports = router;
