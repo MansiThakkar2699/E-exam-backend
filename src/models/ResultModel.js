@@ -3,13 +3,13 @@ const mongoose = require("mongoose");
 const resultSchema = new mongoose.Schema(
   {
     student: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "users",
       required: true,
     },
 
     exam: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "exams",
       required: true,
     },
@@ -17,7 +17,7 @@ const resultSchema = new mongoose.Schema(
     answers: [
       {
         questionId: {
-          type: mongoose.Schema.Types.ObjectId,
+          type: mongoose.Types.ObjectId,
           ref: "questions",
         },
 

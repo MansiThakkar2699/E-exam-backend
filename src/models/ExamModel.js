@@ -9,7 +9,7 @@ const examSchema = new mongoose.Schema(
     },
 
     subject: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "subjects",
       required: true,
     },
@@ -46,7 +46,7 @@ const examSchema = new mongoose.Schema(
     },
 
     createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "users",
     },
   },

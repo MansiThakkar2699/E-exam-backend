@@ -17,13 +17,13 @@ const subjectSchema = new mongoose.Schema(
     },
 
     department: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "departments",
       required: true,
     },
 
     faculty: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "users",
       required: true,
     },
