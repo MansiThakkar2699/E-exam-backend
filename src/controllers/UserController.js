@@ -19,7 +19,8 @@ const getAllUsers = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .select("-password");
+      .select("-password")
+      .populate("department");
 
     res.status(200).json({
       users,

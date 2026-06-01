@@ -10,7 +10,8 @@ const createExam = async (req, res) => {
       duration,
       totalMarks,
       passingMarks,
-      examDate,
+      startTime,
+      endTime,
     } = req.body;
 
     const exam = await Exam.create({
@@ -20,8 +21,9 @@ const createExam = async (req, res) => {
       duration,
       totalMarks,
       passingMarks,
-      examDate,
-      createdBy: req.user._id,
+      startTime,
+      endTime,
+      createdBy: req.user.id,
     });
 
     res.status(201).json({
@@ -36,6 +38,20 @@ const createExam = async (req, res) => {
   }
 };
 
+const getExamStatus = (exam) => {
+  const now = new Date();
+
+  if (now < new Date(exam.startTime)) {
+    return "upcoming";
+  }
+
+  if (now >= new Date(exam.startTime) && now <= new Date(exam.endTime)) {
+    return "live";
+  }
+
+  return "completed";
+};
+
 // GET ALL EXAMS
 const getAllExams = async (req, res) => {
   try {
@@ -43,8 +59,31 @@ const getAllExams = async (req, res) => {
       status: { $ne: "deleted" },
     };
 
+    // FACULTY
+    // if (req.user.role === "faculty") {
+    //   const subjects = await Subject.find({
+    //     faculty: req.user._id,
+    //   }).select("_id");
+
+    //   filter.subject = {
+    //     $in: subjects.map((s) => s._id),
+    //   };
+    // }
+
+    // STUDENT
+    // if (req.user.role === "student") {
+    //   const subjects = await Subject.find({
+    //     department: req.user.department,
+    //   }).select("_id");
+
+    //   filter.subject = {
+    //     $in: subjects.map((s) => s._id),
+    //   };
+    // }
+
+
     if (req.user.role === "faculty") {
-      filter.createdBy = req.user._id;
+      filter.createdBy = req.user.id;
     }
 
     const page = Number(req.query.page) || 1;
@@ -61,11 +100,16 @@ const getAllExams = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
+    const updatedExams = exams.map((exam) => ({
+      ...exam.toObject(),
+      examStatus: getExamStatus(exam),
+    }));
+
     res.status(200).json({
       message: "Exams fetched successfully",
-      exams,
+      exams: updatedExams,
       currentPage: page,
-      totalPages: Math.ceil(totalExams / limit),
+      totalPages: Math.ceil(totalExams / limit) || 1,
       totalExams,
     });
   } catch (error) {
@@ -84,6 +128,20 @@ const getExamById = async (req, res) => {
     if (!exam || exam.status === "deleted") {
       return res.status(404).json({
         message: "Exam not found",
+      });
+    }
+
+    const now = new Date();
+
+    if (now < exam.startTime) {
+      return res.status(400).json({
+        message: "Exam has not started yet",
+      });
+    }
+
+    if (now > exam.endTime) {
+      return res.status(400).json({
+        message: "Exam has already ended",
       });
     }
 

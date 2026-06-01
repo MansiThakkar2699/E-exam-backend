@@ -37,8 +37,9 @@ const userSchema = new mongoose.Schema(
     },
 
     department: {
-      type: String,
-      default: null,
+      type: mongoose.Types.ObjectId,
+      ref: "departments",
+      required: true,
     },
 
     mobile: {

@@ -18,7 +18,7 @@ const {
 router.post("/departments", validateToken, authorizeRoles("admin"), createDepartment);
 
 // GET
-router.get("/departments", validateToken, getDepartments);
+router.get("/departments", getDepartments);
 
 // UPDATE
 router.put("/departments/:id", validateToken, authorizeRoles("admin"), updateDepartment);

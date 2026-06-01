@@ -34,7 +34,12 @@ const examSchema = new mongoose.Schema(
       required: true,
     },
 
-    examDate: {
+    startTime: {
+      type: Date,
+      required: true,
+    },
+
+    endTime: {
       type: Date,
       required: true,
     },
@@ -50,7 +55,9 @@ const examSchema = new mongoose.Schema(
       ref: "users",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 module.exports = mongoose.model("exams", examSchema);

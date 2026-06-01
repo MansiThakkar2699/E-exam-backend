@@ -99,7 +99,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("department");
 
     if (!user) {
       return res.status(404).json({

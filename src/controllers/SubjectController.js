@@ -93,7 +93,7 @@ const getSubjects = async (req, res) => {
 
     // FACULTY CAN SEE OWN SUBJECTS ONLY
     if (req.user.role === "faculty") {
-      filter.faculty = req.user._id;
+      filter.faculty = req.user.id;
     }
 
     const totalSubjects = await Subject.countDocuments(filter);
