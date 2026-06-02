@@ -8,6 +8,7 @@ const {
   getExamById,
   updateExam,
   deleteExam,
+  getStudentExams,
 } = require("../controllers/ExamController");
 
 const {
@@ -49,5 +50,7 @@ router.delete(
   authorizeRoles("admin", "faculty"),
   deleteExam
 );
+
+router.get("/student-exams", validateToken, getStudentExams);
 
 module.exports = router;

@@ -116,7 +116,6 @@ const submitExam = async (req, res) => {
   }
 };
 
-
 // GET STUDENT RESULTS
 const getStudentResults = async (
   req,
@@ -126,13 +125,18 @@ const getStudentResults = async (
     const results = await Result.find({
       student: req.user.id,
     })
-      .populate("exam")
+      .populate({
+        path: "exam",
+        populate: {
+          path: "subject",
+          select: "name",
+        },
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json({
       message:
         "Results fetched successfully",
-
       results,
     });
   } catch (error) {
@@ -143,7 +147,131 @@ const getStudentResults = async (
   }
 };
 
+const getStudentPerformance = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+
+    const results = await Result.find({
+      student: studentId,
+    });
+
+    const totalExams = results.length;
+
+    const passedExams = results.filter(
+      (r) => r.resultStatus === "pass"
+    ).length;
+
+    const failedExams = results.filter(
+      (r) => r.resultStatus === "fail"
+    ).length;
+
+    const averageScore =
+      totalExams > 0
+        ? (
+            results.reduce(
+              (sum, result) => sum + result.percentage,
+              0
+            ) / totalExams
+          ).toFixed(2)
+        : 0;
+
+    res.status(200).json({
+      totalExams,
+      passedExams,
+      failedExams,
+      averageScore,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const getFacultyPerformance = async (req, res) => {
+  try {
+    const facultyId = req.user._id;
+
+    const exams = await Exam.find({
+      createdBy: facultyId,
+    });
+
+    const examIds = exams.map((exam) => exam._id);
+
+    const results = await Result.find({
+      exam: {
+        $in: examIds,
+      },
+    });
+
+    const totalStudents = results.length;
+
+    const passedStudents = results.filter(
+      (result) => result.resultStatus === "pass"
+    ).length;
+
+    const passPercentage =
+      totalStudents > 0
+        ? ((passedStudents / totalStudents) * 100).toFixed(2)
+        : 0;
+
+    const averageScore =
+      totalStudents > 0
+        ? (
+            results.reduce(
+              (sum, result) =>
+                sum + result.percentage,
+              0
+            ) / totalStudents
+          ).toFixed(2)
+        : 0;
+
+    res.status(200).json({
+      totalExams: exams.length,
+      totalStudents,
+      passPercentage,
+      averageScore,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const getFacultyResults = async (req, res) => {
+  try {
+    const exams = await Exam.find({
+      createdBy: req.user.id,
+    });
+
+    const examIds = exams.map(
+      (exam) => exam._id
+    );
+
+    const results = await Result.find({
+      exam: {
+        $in: examIds,
+      },
+    })
+      .populate("student", "fullName email")
+      .populate("exam", "title")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      results,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   submitExam,
   getStudentResults,
+  getStudentPerformance,
+  getFacultyPerformance,
+  getFacultyResults
 };

@@ -1,4 +1,6 @@
 const Exam = require("../models/ExamModel");
+const Subject = require("../models/SubjectModel");
+const User = require("../models/UserModel");
 
 // CREATE EXAM
 const createExam = async (req, res) => {
@@ -209,10 +211,49 @@ const deleteExam = async (req, res) => {
   }
 };
 
+const getStudentExams = async (req, res) => {
+  try {
+    const student = await User.findById(req.user.id);
+
+    const subjects = await Subject.find({
+      department: student.department,
+      status: "active",
+    });
+
+    const subjectIds = subjects.map(
+      (subject) => subject._id
+    );
+
+    const exams = await Exam.find({
+      subject: {
+        $in: subjectIds,
+      },
+      status: "active",
+    })
+      .populate("subject")
+      .sort({ startTime: 1 });
+
+    const examsWithStatus = exams.map((exam) => ({
+      ...exam.toObject(),
+      examStatus: getExamStatus(exam),
+    }));
+
+    res.status(200).json({
+      exams: examsWithStatus,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch exams",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createExam,
   getAllExams,
   getExamById,
   updateExam,
   deleteExam,
+  getStudentExams
 };
