@@ -229,6 +229,7 @@ const getStudentExams = async (req, res) => {
         $in: subjectIds,
       },
       status: "active",
+      publishStatus: "published"
     })
       .populate("subject")
       .sort({ startTime: 1 });
@@ -249,11 +250,61 @@ const getStudentExams = async (req, res) => {
   }
 };
 
+const publishExam = async (req, res) => {
+  try {
+    const exam = await Exam.findById(req.params.id);
+
+    if (!exam) {
+      return res.status(404).json({
+        message: "Exam not found",
+      });
+    }
+
+    exam.publishStatus = "published";
+
+    await exam.save();
+
+    res.status(200).json({
+      message: "Exam published successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const unpublishExam = async (req, res) => {
+  try {
+    const exam = await Exam.findById(req.params.id);
+
+    if (!exam) {
+      return res.status(404).json({
+        message: "Exam not found",
+      });
+    }
+
+    exam.publishStatus = "draft";
+
+    await exam.save();
+
+    res.status(200).json({
+      message: "Exam moved to draft",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createExam,
   getAllExams,
   getExamById,
   updateExam,
   deleteExam,
-  getStudentExams
+  getStudentExams,
+  publishExam,
+  unpublishExam
 };

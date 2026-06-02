@@ -1,10 +1,19 @@
 const Question = require("../models/QuestionModel");
+const Exam = require("../models/ExamModel");
 
 // CREATE QUESTION
 const createQuestion = async (req, res) => {
   try {
     const { exam, question, options, correctAnswer, marks, questionType } =
       req.body;
+
+    const examData = await Exam.findById(exam);
+
+    if (examData.publishStatus === "published") {
+      return res.status(400).json({
+        message: "Published exam cannot be modified",
+      });
+    }
 
     const newQuestion = await Question.create({
       exam,
@@ -13,7 +22,7 @@ const createQuestion = async (req, res) => {
       correctAnswer,
       marks,
       questionType,
-      createdBy: req.user._id,
+      createdBy: req.user.id,
     });
 
     res.status(201).json({
@@ -91,9 +100,7 @@ const getQuestionsByExam = async (req, res) => {
 // UPDATE QUESTION
 const updateQuestion = async (req, res) => {
   try {
-    const question = await Question.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const question = await Question.findById(req.params.id);
 
     if (!question) {
       return res.status(404).json({
@@ -101,14 +108,28 @@ const updateQuestion = async (req, res) => {
       });
     }
 
+    // GET EXAM
+    const exam = await Exam.findById(question.exam);
+
+    if (exam.publishStatus === "published") {
+      return res.status(400).json({
+        message: "Published exam cannot be modified",
+      });
+    }
+
+    const updatedQuestion = await Question.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
     res.status(200).json({
       message: "Question updated successfully",
-      question,
+      question: updatedQuestion,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Failed to update question",
-      error: error.message,
+      message: error.message,
     });
   }
 };
@@ -116,11 +137,7 @@ const updateQuestion = async (req, res) => {
 // DELETE QUESTION
 const deleteQuestion = async (req, res) => {
   try {
-    const question = await Question.findByIdAndUpdate(
-      req.params.id,
-      { status: "deleted" },
-      { new: true },
-    );
+    const question = await Question.findById(req.params.id);
 
     if (!question) {
       return res.status(404).json({
@@ -128,14 +145,27 @@ const deleteQuestion = async (req, res) => {
       });
     }
 
+    // GET EXAM
+    const exam = await Exam.findById(question.exam);
+
+    if (exam.publishStatus === "published") {
+      return res.status(400).json({
+        message: "Published exam cannot be modified",
+      });
+    }
+
+     const updatedQuestion = await Question.findByIdAndUpdate(
+      req.params.id,
+      { status: "deleted" },
+      { new: true },
+    );
+
     res.status(200).json({
       message: "Question deleted successfully",
-      question,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Failed to delete question",
-      error: error.message,
+      message: error.message,
     });
   }
 };

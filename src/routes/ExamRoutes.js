@@ -9,6 +9,8 @@ const {
   updateExam,
   deleteExam,
   getStudentExams,
+  publishExam,
+  unpublishExam
 } = require("../controllers/ExamController");
 
 const {
@@ -52,5 +54,19 @@ router.delete(
 );
 
 router.get("/student-exams", validateToken, getStudentExams);
+
+router.put(
+  "/publish/:id",
+  validateToken,
+  authorizeRoles("faculty", "admin"),
+  publishExam
+);
+
+router.put(
+  "/unpublish/:id",
+  validateToken,
+  authorizeRoles("faculty", "admin"),
+  unpublishExam
+);
 
 module.exports = router;

@@ -44,9 +44,15 @@ const examSchema = new mongoose.Schema(
       required: true,
     },
 
+    publishStatus: {
+      type: String,
+      enum: ["draft", "published"],
+      default: "draft",
+    },
+
     status: {
       type: String,
-      enum: ["active", "inactive", "deleted"],
+      enum: ["active","deleted"],
       default: "active",
     },
 
@@ -57,7 +63,7 @@ const examSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("exams", examSchema);
