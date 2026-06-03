@@ -7,15 +7,39 @@ const getAllUsers = async (req, res) => {
 
     const limit = Number(req.query.limit) || 10;
 
+    const search = req.query.search || "";
+    const role = req.query.role || "all";
+
     const skip = (page - 1) * limit;
 
-    const totalUsers = await User.countDocuments({
+    const filter = {
       isDeleted: false,
-    });
+    };
 
-    const users = await User.find({
-      isDeleted: false,
-    })
+    if (search) {
+      filter.$or = [
+        {
+          fullName: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          email: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    if (role !== "all") {
+      filter.role = role;
+    }
+
+    const totalUsers = await User.countDocuments(filter);
+
+    const users = await User.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -146,5 +170,5 @@ module.exports = {
   updateUserRole,
   updateUserStatus,
   deleteUser,
-  getFaculties
+  getFaculties,
 };

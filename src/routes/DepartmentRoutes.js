@@ -7,6 +7,7 @@ const {
   getDepartments,
   updateDepartment,
   deleteDepartment,
+  getDepartmentOptions
 } = require("../controllers/DepartmentController");
 
 const {
@@ -25,5 +26,7 @@ router.put("/departments/:id", validateToken, authorizeRoles("admin"), updateDep
 
 // DELETE
 router.delete("/departments/:id", validateToken, authorizeRoles("admin"), deleteDepartment);
+
+router.get("/department-options", validateToken, getDepartmentOptions);
 
 module.exports = router;

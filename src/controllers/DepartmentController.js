@@ -131,9 +131,31 @@ const deleteDepartment = async (req, res) => {
   }
 };
 
+// GET ACTIVE DEPARTMENTS FOR DROPDOWN
+const getDepartmentOptions = async (req, res) => {
+  try {
+    const departments = await Department.find({
+      isDeleted: false,
+      status: "active",
+    })
+      .select("name")
+      .sort({ name: 1 });
+
+    res.status(200).json({
+      departments,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch departments",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createDepartment,
   getDepartments,
   updateDepartment,
   deleteDepartment,
+  getDepartmentOptions
 };
