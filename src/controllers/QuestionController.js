@@ -45,7 +45,7 @@ const getAllQuestions = async (req, res) => {
     };
 
     if (req.user.role === "faculty") {
-      filter.createdBy = req.user._id;
+      filter.createdBy = req.user.id;
     }
 
     const page = Number(req.query.page) || 1;

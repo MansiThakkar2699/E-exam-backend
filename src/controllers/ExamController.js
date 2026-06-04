@@ -1,6 +1,7 @@
 const Exam = require("../models/ExamModel");
 const Subject = require("../models/SubjectModel");
 const User = require("../models/UserModel");
+const Question = require("../models/QuestionModel");
 
 // CREATE EXAM
 const createExam = async (req, res) => {
@@ -61,29 +62,6 @@ const getAllExams = async (req, res) => {
       status: { $ne: "deleted" },
     };
 
-    // FACULTY
-    // if (req.user.role === "faculty") {
-    //   const subjects = await Subject.find({
-    //     faculty: req.user._id,
-    //   }).select("_id");
-
-    //   filter.subject = {
-    //     $in: subjects.map((s) => s._id),
-    //   };
-    // }
-
-    // STUDENT
-    // if (req.user.role === "student") {
-    //   const subjects = await Subject.find({
-    //     department: req.user.department,
-    //   }).select("_id");
-
-    //   filter.subject = {
-    //     $in: subjects.map((s) => s._id),
-    //   };
-    // }
-
-
     if (req.user.role === "faculty") {
       filter.createdBy = req.user.id;
     }
@@ -102,10 +80,19 @@ const getAllExams = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    const updatedExams = exams.map((exam) => ({
-      ...exam.toObject(),
-      examStatus: getExamStatus(exam),
-    }));
+    const updatedExams = exams.map((exam) => {
+      const diffInMs =
+        new Date(exam.startTime) - new Date();
+
+      return {
+        ...exam.toObject(),
+        canUnpublish:
+          exam.publishStatus === "published" &&
+          diffInMs > 60 * 60 * 1000,
+
+        examStatus: getExamStatus(exam),
+      };
+    });
 
     res.status(200).json({
       message: "Exams fetched successfully",
@@ -220,16 +207,14 @@ const getStudentExams = async (req, res) => {
       status: "active",
     });
 
-    const subjectIds = subjects.map(
-      (subject) => subject._id
-    );
+    const subjectIds = subjects.map((subject) => subject._id);
 
     const exams = await Exam.find({
       subject: {
         $in: subjectIds,
       },
       status: "active",
-      publishStatus: "published"
+      publishStatus: "published",
     })
       .populate("subject")
       .sort({ startTime: 1 });
@@ -260,6 +245,39 @@ const publishExam = async (req, res) => {
       });
     }
 
+    // EXAM DELETED
+    if (exam.status === "deleted") {
+      return res.status(400).json({
+        message: "Cannot publish a deleted exam",
+      });
+    }
+
+    // ALREADY PUBLISHED
+    if (exam.publishStatus === "published") {
+      return res.status(400).json({
+        message: "Exam is already published",
+      });
+    }
+
+    // EXAM DATE VALIDATION
+    if (new Date(exam.examDate) <= new Date()) {
+      return res.status(400).json({
+        message: "Exam date must be in the future",
+      });
+    }
+
+    // MINIMUM 5 QUESTIONS REQUIRED
+    const questionCount = await Question.countDocuments({
+      exam: exam._id,
+      status: "active",
+    });
+
+    if (questionCount < 5) {
+      return res.status(400).json({
+        message: "At least 5 questions are required to publish an exam",
+      });
+    }
+
     exam.publishStatus = "published";
 
     await exam.save();
@@ -284,15 +302,37 @@ const unpublishExam = async (req, res) => {
       });
     }
 
+    // Must be published
+    if (exam.publishStatus !== "published") {
+      return res.status(400).json({
+        message: "Only published exams can be unpublished",
+      });
+    }
+
+    // ⛔ TIME RESTRICTION LOGIC
+    const now = new Date();
+    const examStart = new Date(exam.startTime);
+
+    const diffInMs = examStart - now;
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+
+    // ❌ If exam is within 1 hour, block unpublish
+    if (diffInHours <= 1) {
+      return res.status(400).json({
+        message: "Cannot unpublish exam within 1 hour of exam start time",
+      });
+    }
+
+    // ✅ Allow unpublish
     exam.publishStatus = "draft";
 
     await exam.save();
 
-    res.status(200).json({
-      message: "Exam moved to draft",
+    return res.status(200).json({
+      message: "Exam moved to draft successfully",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -306,5 +346,5 @@ module.exports = {
   deleteExam,
   getStudentExams,
   publishExam,
-  unpublishExam
+  unpublishExam,
 };
