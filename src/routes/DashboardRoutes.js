@@ -5,6 +5,10 @@ const router = express.Router();
 const {
   getAdminDashboard,
   getFacultyDashboard,
+  getStudentDashboardSummary,
+  getUpcomingExams,
+  getRecentResults,
+  getPerformanceChart
 } = require("../controllers/DashboardController");
 
 const {
@@ -28,6 +32,34 @@ router.get(
   validateToken,
   authorizeRoles("faculty"),
   getFacultyDashboard
+);
+
+router.get(
+  "/dashboard-summary",
+  validateToken,
+  authorizeRoles("student"),
+  getStudentDashboardSummary
+);
+
+router.get(
+  "/upcoming-exams",
+  validateToken,
+  authorizeRoles("student"),
+  getUpcomingExams
+);
+
+router.get(
+  "/recent-results",
+  validateToken,
+  authorizeRoles("student"),
+  getRecentResults
+);
+
+router.get(
+  "/performance-chart",
+  validateToken,
+  authorizeRoles("student"),
+  getPerformanceChart
 );
 
 module.exports = router;
