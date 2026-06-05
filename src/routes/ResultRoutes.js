@@ -7,7 +7,9 @@ const {
   getStudentResults,
   getStudentPerformance,
   getFacultyPerformance,
-  getFacultyResults
+  getFacultyResults,
+  getSubjectWisePerformance,
+  getResultById
 } = require("../controllers/ResultController");
 
 const {
@@ -52,6 +54,18 @@ router.get(
   validateToken,
   authorizeRoles("faculty"),
   getFacultyResults
+);
+
+router.get(
+  "/subject-wise-performance",
+  validateToken,
+  getSubjectWisePerformance
+);
+
+router.get(
+  "/student-result/:resultId",
+  validateToken,
+  getResultById
 );
 
 module.exports = router;
