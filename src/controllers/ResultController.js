@@ -166,7 +166,7 @@ const getStudentPerformance = async (req, res) => {
 
 const getFacultyPerformance = async (req, res) => {
   try {
-    const facultyId = req.user._id;
+    const facultyId = req.user.id;
 
     const exams = await Exam.find({
       createdBy: facultyId,
