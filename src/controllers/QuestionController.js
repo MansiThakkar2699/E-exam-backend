@@ -66,7 +66,7 @@ const getAllQuestions = async (req, res) => {
       message: "Questions fetched successfully",
       questions,
       currentPage: page,
-      totalPages: Math.ceil(totalQuestions / limit),
+      totalPages: Math.ceil(totalQuestions / limit) || 1,
       totalQuestions,
     });
   } catch (error) {

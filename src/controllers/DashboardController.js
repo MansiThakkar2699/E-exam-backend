@@ -8,6 +8,8 @@ const Department = require("../models/DepartmentModel");
 
 const Result = require("../models/ResultModel");
 
+const Subject = require("../models/SubjectModel");
+
 // ADMIN DASHBOARD
 const getAdminDashboard = async (req, res) => {
   try {
@@ -48,7 +50,7 @@ const getAdminDashboard = async (req, res) => {
     })
       .populate("subject")
       .sort({
-        examDate: 1,
+        startTime: 1,
       })
       .limit(5);
 
@@ -139,20 +141,27 @@ const getStudentDashboardSummary = async (req, res) => {
     const averagePercentage =
       results.length > 0
         ? (
-            results.reduce(
-              (sum, item) => sum + item.percentage,
-              0
-            ) / results.length
+            results.reduce((sum, item) => sum + item.percentage, 0) /
+            results.length
           ).toFixed(2)
         : 0;
 
-    const attemptedExamIds = results.map(
-      (r) => r.exam.toString()
-    );
+    const attemptedExamIds = results.map((r) => r.exam.toString());
+
+    const student = await User.findById(studentId).select("department");
+
+    const subjects = await Subject.find({
+      department: student.department,
+    }).select("_id");
+
+    const subjectIds = subjects.map((subject) => subject._id);
 
     const availableExams = await Exam.countDocuments({
       publishStatus: "published",
       status: "active",
+      subject: {
+        $in: subjectIds,
+      },
       _id: {
         $nin: attemptedExamIds,
       },
@@ -176,13 +185,13 @@ const getUpcomingExams = async (req, res) => {
     const exams = await Exam.find({
       publishStatus: "published",
       status: "active",
-      examDate: {
+      startTime: {
         $gt: new Date(),
       },
     })
       .populate("subject")
       .sort({
-        examDate: 1,
+        startTime: 1,
       })
       .limit(5);
 
@@ -225,7 +234,7 @@ const getPerformanceChart = async (req, res) => {
 
     const chartData = results.map((result) => ({
       exam: result.exam.title,
-      percentage: result.percentage,
+      percentage: result.percentage.toFixed(2),
     }));
 
     res.status(200).json(chartData);
@@ -242,5 +251,5 @@ module.exports = {
   getStudentDashboardSummary,
   getUpcomingExams,
   getRecentResults,
-  getPerformanceChart
+  getPerformanceChart,
 };
